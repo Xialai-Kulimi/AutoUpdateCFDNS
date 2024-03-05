@@ -61,15 +61,16 @@ def do_dns_update(new_ip, ip_type):
             progress.update(task_scan, advance=1)
             if dns_record['name'] in config['records_to_update'] and dns_record['type'] ==ip_type:
                 progress.update(task_update, advance=1)
+                console.log(f'Update {dns_record["name"]} from {dns_record["type"]} {dns_record["content"]} to {ip_type} {new_ip}')
                 dns_record['content'] = new_ip
                 cf.zones.dns_records.put(zone_id, dns_record['id'], data=dns_record)
-                console.log(f'Update {dns_record["name"]} to {ip_type} {new_ip}')
 
 
 def main():
     ip_address, ip_type = my_ip_address()
     while True:
         if ip_address != old_ip_address:
+            old_ip_address = ip_address
             console.log(f"Detected new ip: {ip_type} {ip_address}")
             do_dns_update(ip_address, ip_type)
         sleep(60)
