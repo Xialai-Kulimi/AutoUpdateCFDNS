@@ -60,10 +60,16 @@ def do_dns_update(new_ip, ip_type):
         for dns_record in dns_records:
             progress.update(task_scan, advance=1)
             if dns_record['name'] in config['records_to_update'] and dns_record['type'] ==ip_type:
+                if dns_record["content"] == new_ip:
+                    console.log(f"{dns_record["name"]} {dns_record["type"]} {dns_record["content"]} is correct, no need to update")
+                    continue
                 progress.update(task_update, advance=1)
                 console.log(f'Update {dns_record["name"]} from {dns_record["type"]} {dns_record["content"]} to {ip_type} {new_ip}')
                 dns_record['content'] = new_ip
-                cf.zones.dns_records.put(zone_id, dns_record['id'], data=dns_record)
+                if config['debug']:
+                    console.log('[MOCK]')
+                else:
+                    cf.zones.dns_records.put(zone_id, dns_record['id'], data=dns_record)
 
 
 def main():

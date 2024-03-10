@@ -1,0 +1,6 @@
+version: '3'
+services:
+  auto-dns-update:
+    container_name: audo-dns-update
+    build: .
+    restart: always
