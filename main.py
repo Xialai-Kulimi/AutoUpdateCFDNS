@@ -137,8 +137,8 @@ def do_dns_update(new_ip, ip_type):
 
 def main():
     global old_ip_address
-    ip_address, ip_type = my_ip_address()
     while True:
+        ip_address, ip_type = my_ip_address()
         if ip_address != old_ip_address:
             old_ip_address = ip_address
             console.log(f"Detected new ip: {ip_type} {ip_address}")
