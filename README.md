@@ -3,13 +3,17 @@
 
 design for ubuntu
 
+track update log in dns_update.log
+
 :::
 Requires pppd to function properly
 :::
 
 :::
-Please remember to uninstall the script before removed
+Please remember to remove the script before removed
 :::
+
+
 
 # install
 
@@ -17,11 +21,12 @@ create a file in `/etc/ppp/ip-up.d`
 
 ```bash
 #!/bin/bash
+cd /path/to/your/repo/
 
 # Activate the virtual environment
-source /path/to/your/venv/bin/activate
+source venv/bin/activate
 # Run the Python script
-python /path/to/your/main.py "$PPP_LOCAL"
+python main.py "$PPP_LOCAL"
 # Deactivate the virtual environment
 deactivate
 ```

@@ -11,7 +11,9 @@ from time import sleep
 from rich.progress import Progress
 import sys
 
-console = Console()
+f = open('dns_update.log', 'a')
+
+console = Console(file=f)
 with open("config.json") as f:
     config = json.load(f)
     console.log("loaded config")
