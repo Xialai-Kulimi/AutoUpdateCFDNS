@@ -9,6 +9,7 @@ from rich.console import Console
 import json
 from time import sleep
 from rich.progress import Progress
+import sys
 
 console = Console()
 with open("config.json") as f:
@@ -17,30 +18,30 @@ with open("config.json") as f:
     console.log(config)
 
 
-def my_ip_address():
-    """Cloudflare API code - example"""
+# def my_ip_address():
+#     """Cloudflare API code - example"""
 
-    # This list is adjustable - plus some v6 enabled services are needed
-    # url = 'http://myip.dnsomatic.com'
-    # url = 'http://www.trackip.net/ip'
-    # url = 'http://myexternalip.com/raw'
-    url = "https://api.ipify.org"
-    try:
-        ip_address = requests.get(url).text
-    except requests.exceptions.ConnectionError as e:
-        exit("%s: failed - %s" % (url, e))
-    if ip_address == "":
-        exit("%s: failed" % (url))
+#     # This list is adjustable - plus some v6 enabled services are needed
+#     # url = 'http://myip.dnsomatic.com'
+#     # url = 'http://www.trackip.net/ip'
+#     # url = 'http://myexternalip.com/raw'
+#     url = "https://api.ipify.org"
+#     try:
+#         ip_address = requests.get(url).text
+#     except requests.exceptions.ConnectionError as e:
+#         exit("%s: failed - %s" % (url, e))
+#     if ip_address == "":
+#         exit("%s: failed" % (url))
 
-    if ":" in ip_address:
-        ip_address_type = "AAAA"
-    else:
-        ip_address_type = "A"
+#     if ":" in ip_address:
+#         ip_address_type = "AAAA"
+#     else:
+#         ip_address_type = "A"
 
-    return ip_address, ip_address_type
+#     return ip_address, ip_address_type
 
 
-old_ip_address = None
+# old_ip_address = None
 
 cf = Cloudflare(
         api_email=environ.get("API_EMAIL"),
@@ -135,18 +136,18 @@ def do_dns_update(new_ip, ip_type):
 
 
 
-def main():
-    global old_ip_address
-    while True:
-        ip_address, ip_type = my_ip_address()
-        if ip_address != old_ip_address:
-            old_ip_address = ip_address
-            console.log(f"Detected new ip: {ip_type} {ip_address}")
-            do_dns_update(ip_address, ip_type)
-        sleep(60)
+# def main():
+#     global old_ip_address
+#     while True:
+#         ip_address, ip_type = my_ip_address()
+#         if ip_address != old_ip_address:
+#             old_ip_address = ip_address
+#             console.log(f"Detected new ip: {ip_type} {ip_address}")
+#             do_dns_update(ip_address, ip_type)
+#         sleep(60)
 
     # console.log(cf.zones.dns_records.get(zone_id))
 
 
 if __name__ == "__main__":
-    main()
+    do_dns_update(sys.argv[0], 'A')
