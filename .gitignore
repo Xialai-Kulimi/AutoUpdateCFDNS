@@ -4,3 +4,4 @@ __pycache__
 config.json
 .cache
 .DS_Store
+dns_update.log

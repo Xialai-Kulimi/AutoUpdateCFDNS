@@ -3,6 +3,8 @@
 
 Now recommend using Supervisord to manage the process of script.
 
+Can also call by ppp ip-ip.d, see below.
+
 ## auto update dns record to cloudflare
 
 design for ubuntu
