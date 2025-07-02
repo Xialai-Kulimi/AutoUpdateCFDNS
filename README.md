@@ -1,5 +1,9 @@
 
-# auto update dns record to cloudflare
+# Important
+
+Now recommend using Supervisord to manage the process of script.
+
+## auto update dns record to cloudflare
 
 design for ubuntu
 
@@ -13,9 +17,7 @@ Requires pppd to function properly
 Please remember to remove the script before removed
 :::
 
-
-
-# install
+ install
 
 create a file in `/etc/ppp/ip-up.d`
 
@@ -31,7 +33,7 @@ python main.py "$PPP_LOCAL"
 deactivate
 ```
 
-# files
+## files
 
 .env
 
