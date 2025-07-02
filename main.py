@@ -3,6 +3,8 @@ from watchdog.events import FileSystemEventHandler
 import threading
 import os
 from dotenv import load_dotenv
+import hashlib
+from threading import Timer
 
 load_dotenv()
 
@@ -18,12 +20,19 @@ console = Console()
 
 config = {}
 config_lock = threading.Lock()
+last_hash = None
+reload_timer = None
 
 def load_config():
-    global config
-    with open("config.json") as f:
+    global config, last_hash
+    with open("config.json", "rb") as f:
+        content = f.read()
+        current_hash = hashlib.md5(content).hexdigest()
+        if current_hash == last_hash:
+            return  # No content change
+        last_hash = current_hash
         with config_lock:
-            config = json.load(f)
+            config = json.loads(content.decode())
             console.log("🔁 config reloaded")
             console.log(config)
 
@@ -66,11 +75,12 @@ def do_dns_update(new_ip, ip_type):
 # Add config monitor class and starter
 class ConfigChangeHandler(FileSystemEventHandler):
     def on_modified(self, event):
+        global reload_timer
         if event.src_path.endswith("config.json"):
-            try:
-                load_config()
-            except Exception as e:
-                console.log(f"❌ Failed to reload config: {e}")
+            if reload_timer:
+                reload_timer.cancel()
+            reload_timer = Timer(0.5, load_config)
+            reload_timer.start()
 
 def start_config_monitor():
     event_handler = ConfigChangeHandler()
