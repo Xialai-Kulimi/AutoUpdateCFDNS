@@ -12,7 +12,6 @@ import requests
 from rich.console import Console
 import json
 from time import sleep
-from rich.progress import Progress
 import sys
 
 console = Console()
@@ -40,26 +39,28 @@ cf = Cloudflare(
 
 
 def do_dns_update(new_ip, ip_type):
-
     zones = cf.dns.records.list(zone_id=config['zone_id'])
     dns_records = zones.to_dict()['result']
-    with Progress(console=console) as progress:
-        task_scan = progress.add_task("Scanning DNS...", total=len(dns_records))
-        task_update = progress.add_task("Updating DNS...", total=len(config['records_to_update']))
-        for dns_record in dns_records:
-            progress.update(task_scan, advance=1)
-            if dns_record['name'] in config['records_to_update'] and dns_record['type'] ==ip_type:
-                if dns_record["content"] == new_ip:
-                    console.log(f"{dns_record['name']} {dns_record['type']} {dns_record['content']} is correct, no need to update")
-                    continue
-                progress.update(task_update, advance=1)
-                console.log(f'Update {dns_record["name"]} from {dns_record["type"]} {dns_record["content"]} to {ip_type} {new_ip}')
-                dns_record['content'] = new_ip
-                if config['debug']:
-                    console.log('[MOCK]')
-                    console.log(dns_record)
-                else:
-                    cf.dns.records.edit(zone_id = config['zone_id'], dns_record_id=dns_record['id'], type=dns_record['type'], content=dns_record['content'],  name=dns_record['name'])
+    total_scan = len(dns_records)
+    total_update = len(config['records_to_update'])
+    scan_count = 0
+    update_count = 0
+    for dns_record in dns_records:
+        scan_count += 1
+        if dns_record['name'] in config['records_to_update'] and dns_record['type'] == ip_type:
+            if dns_record["content"] == new_ip:
+                console.log(f"{dns_record['name']} {dns_record['type']} {dns_record['content']} is correct, no need to update")
+                continue
+            update_count += 1
+            console.log(f'Update {dns_record["name"]} from {dns_record["type"]} {dns_record["content"]} to {ip_type} {new_ip}')
+            dns_record['content'] = new_ip
+            if config['debug']:
+                console.log('[MOCK]')
+                console.log(dns_record)
+            else:
+                cf.dns.records.edit(zone_id = config['zone_id'], dns_record_id=dns_record['id'], type=dns_record['type'], content=dns_record['content'],  name=dns_record['name'])
+        # Print progress log at the end of each iteration
+        console.log(f"✅ Scan complete: {scan_count}/{total_scan}, Updated: {update_count}/{total_update}")
 
 
 # Add config monitor class and starter
