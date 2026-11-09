@@ -177,9 +177,9 @@ sudo bash deploy/install.sh
    ```
 3. **停止並移除舊版 supervisord 程式**：
    ```bash
-   sudo supervisorctl stop AutoUpdateCFDNS
+   sudo supervisorctl stop AutoUpdateDNS
    # 移除舊的 supervisor 設定檔並 reload
-   sudo rm /etc/supervisor/conf.d/AutoUpdateCFDNS.conf
+   sudo rm /etc/supervisor/conf.d/autoUpdateDNS.conf
    sudo supervisorctl update
    ```
 4. **移除舊版 ppp hook**：
