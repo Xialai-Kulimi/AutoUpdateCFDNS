@@ -13,9 +13,9 @@ from rich.panel import Panel
 from rich.table import Table
 
 import cfdns
-from cfdns.config import ConfigError, load_config
+from cfdns.config import ConfigError, load_config, load_env
 from cfdns.ipsource import IPSourceError, validate_ipv4
-from cfdns.paths import config_path as default_config_path, socket_path as default_socket_path
+from cfdns.paths import config_path as default_config_path, env_path, socket_path as default_socket_path
 from cfdns.protocol import DaemonNotRunning, send_request
 
 console = Console()
@@ -88,10 +88,15 @@ def handle_config(args: argparse.Namespace) -> int:
     cfg_path = default_config_path(args.config)
     try:
         resp = send_request("config", socket_path=args.socket)
+        if not resp.get("ok"):
+            err_console.print(f"[red]Error:[/red] {resp.get('error')}")
+            return 1
         source = "daemon"
         data = resp.get("data")
     except DaemonNotRunning:
         source = "file"
+        # Load .env next to the config so the env presence report is accurate
+        load_env(env_path(cfg_path))
         try:
             cfg = load_config(cfg_path)
             data = {
@@ -223,7 +228,8 @@ def handle_add(args: argparse.Namespace) -> int:
     elif action == "updated":
         console.print(f"{prefix}✔ Updated A record {name} → {ip} (proxied: {proxied}, ttl: {ttl}) and added to tracking")
     elif action == "exists":
-        console.print(f"{prefix}✔ A record {name} already points to {ip}; tracking updated")
+        tracking = "already tracked" if data.get("already_tracked") else "added to tracking"
+        console.print(f"{prefix}✔ A record {name} already points to {ip}; {tracking}")
 
     if data.get("dry_run"):
         console.print("[dim](Note: config.json was updated locally, Cloudflare API call was skipped due to debug=true)[/dim]")

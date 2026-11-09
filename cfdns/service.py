@@ -148,6 +148,9 @@ class DDNSService:
                 ip = self.ip_getter()
                 self.current_ip = ip
                 self.last_check_at = self.clock()
+                # Clear a stale IP-detection error once detection works again
+                if self.last_error and self.last_error.startswith("Failed to get public IP"):
+                    self.last_error = None
             except Exception as e:
                 self.last_error = f"Failed to get public IP: {e}"
                 logger.warning("Failed to get public IP: %s", e)
@@ -162,7 +165,12 @@ class DDNSService:
             if needs_sync or reconcile_due:
                 reason = "IP changed" if needs_sync else "reconcile interval reached"
                 logger.debug("Triggering sync (%s)", reason)
-                self.sync(ip=self.current_ip)
+                try:
+                    self.sync(ip=self.current_ip)
+                except Exception as e:
+                    # sync() already recorded last_error; log concisely (no traceback
+                    # spam every interval during a Cloudflare / network outage).
+                    logger.error("Sync failed, will retry next tick: %s", e)
             else:
                 logger.debug("IP %s has not changed and reconcile not due", self.current_ip)
 
@@ -284,6 +292,8 @@ class DDNSService:
     ) -> AddResult:
         """Add domain to Cloudflare DNS and tracking list."""
         with self.lock:
+            if ttl is not None and ttl != 1 and not (60 <= ttl <= 86400):
+                raise ValueError(f"Invalid TTL {ttl}: must be 1 (auto) or between 60 and 86400 seconds")
             resolved_name = self._resolve_and_validate_domain(name)
             ip = self.current_ip or self.ip_getter()
 
@@ -384,17 +394,12 @@ class DDNSService:
             if resolved_name not in self.config.records_to_update:
                 raise ValueError(f"Domain '{resolved_name}' is not in tracking list")
 
-            # Remove from config
-            self.config.records_to_update.remove(resolved_name)
-            save_config(self.config_path, self.config)
-            self.last_fingerprint = config_fingerprint(self.config_path)
-            self.record_states.pop(resolved_name, None)
-            logger.info("Removed '%s' from tracking list in config", resolved_name)
-
             record_deleted = False
             skip_reason: str | None = None
             dry_run = self.config.debug
 
+            # Handle Cloudflare deletion first: if it fails, the config is left
+            # untouched so the user can simply retry the same command.
             if delete_record:
                 cf = self._get_cf_client()
                 a_recs = [r for r in cf.list_records(name=resolved_name, type="A")]
@@ -418,6 +423,13 @@ class DDNSService:
                                 cf.delete_record(rec.id)
                                 record_deleted = True
                                 logger.info("Deleted record '%s' (id: %s) on Cloudflare", resolved_name, rec.id)
+
+            # Remove from config
+            self.config.records_to_update.remove(resolved_name)
+            save_config(self.config_path, self.config)
+            self.last_fingerprint = config_fingerprint(self.config_path)
+            self.record_states.pop(resolved_name, None)
+            logger.info("Removed '%s' from tracking list in config", resolved_name)
 
             return RemoveResult(
                 name=resolved_name,
