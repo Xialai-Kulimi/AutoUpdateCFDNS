@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cfdns"
+version = "2.0.0"
+description = "Cloudflare DDNS background service and CLI"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "cloudflare==3.1.0",
+    "pydantic<2.10",
+    "httpx<0.28.0",
+    "python-dotenv",
+    "rich",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+]
+
+[project.scripts]
+cfdns = "cfdns.cli:main"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+

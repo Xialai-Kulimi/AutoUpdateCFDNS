@@ -1,9 +1,11 @@
-FROM python:latest
+FROM python:3.11-slim
 
-RUN mkdir /data
+RUN mkdir -p /data
 WORKDIR /data
 COPY . /data
 
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir .
 
-ENTRYPOINT [ "python", "main.py" ]
+ENV CFDNS_SOCKET=/tmp/cfdns.sock
+
+ENTRYPOINT ["cfdns", "daemon"]

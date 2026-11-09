@@ -1,5 +1,5 @@
 cloudflare==3.1.0
+pydantic<2.10
+httpx<0.28.0
 rich
 python-dotenv
-requests
-watchdog

@@ -1,0 +1,4 @@
+#!/bin/sh
+# Notify cfdns daemon that ppp got a new IP. Never block or fail pppd.
+timeout 30 /usr/local/bin/cfdns sync --ip "$4" >/dev/null 2>&1 || true
+exit 0

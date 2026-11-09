@@ -1,0 +1,13 @@
+{
+    "zone_id": "023e105f4ecef8ad9ca31a8372d0c353",
+    "records_to_update": [
+        "example.com",
+        "app.example.com",
+        "api.example.com"
+    ],
+    "debug": false,
+    "interval": 30,
+    "reconcile_interval": 3600,
+    "default_ttl": 1,
+    "default_proxied": false
+}
