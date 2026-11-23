@@ -81,7 +81,8 @@ def do_dns_update(new_ip, ip_type):
                 log('[MOCK]')
                 log(str(dns_record))
             else:
-                cf.dns.records.edit(zone_id = config['zone_id'], dns_record_id=dns_record['id'], type=dns_record['type'], content=dns_record['content'],  name=dns_record['name'])
+                # Always send proxied/ttl explicitly: omitting them makes Cloudflare reset proxied to false
+                cf.dns.records.edit(zone_id = config['zone_id'], dns_record_id=dns_record['id'], type=dns_record['type'], content=dns_record['content'],  name=dns_record['name'], proxied=bool(dns_record.get('proxied', True)), ttl=dns_record.get('ttl', 1))
         # Print progress log at the end of each iteration
         log(f"✅ Scan complete: {scan_count}/{total_scan}, Updated: {update_count}/{total_update}")
     last_uploaded_ip = new_ip

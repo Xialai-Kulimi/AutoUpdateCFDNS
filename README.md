@@ -63,7 +63,7 @@ DNS 管理設定（相容 v1 欄位）：
     "interval": 30,
     "reconcile_interval": 3600,
     "default_ttl": 1,
-    "default_proxied": false
+    "default_proxied": true
 }
 ```
 
@@ -75,7 +75,7 @@ DNS 管理設定（相容 v1 欄位）：
 | `interval` | 整數 | `30` | 輪詢 IP 週期（秒），最小值為 5 |
 | `reconcile_interval`| 整數 | `3600` | 強制對帳間隔（秒）。0 代表關閉 |
 | `default_ttl` | 整數 | `1` | 新增記錄時的 TTL（1 代表 Cloudflare Auto） |
-| `default_proxied` | 布林值 | `false` | 新增記錄時是否啟用 Cloudflare Proxy（橘色雲朵） |
+| `default_proxied` | 布林值 | `true` | 新增記錄時是否啟用 Cloudflare Proxy（橘色雲朵） |
 
 ---
 

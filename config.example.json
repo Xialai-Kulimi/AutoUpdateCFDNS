@@ -9,5 +9,5 @@
     "interval": 30,
     "reconcile_interval": 3600,
     "default_ttl": 1,
-    "default_proxied": false
+    "default_proxied": true
 }

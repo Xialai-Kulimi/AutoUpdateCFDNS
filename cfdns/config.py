@@ -22,7 +22,7 @@ class Config:
     interval: int = 30              # Polling interval in seconds, minimum 5
     reconcile_interval: int = 3600  # Force reconcile interval in seconds; 0 = disabled
     default_ttl: int = 1            # 1 = Cloudflare auto
-    default_proxied: bool = False
+    default_proxied: bool = True
     extra: dict[str, Any] = field(default_factory=dict)
 
 
@@ -90,7 +90,7 @@ def load_config(path: Path | str) -> Config:
     if not isinstance(default_ttl, int) or default_ttl < 1:
         raise ConfigError(f"'default_ttl' must be an integer >= 1 (got {default_ttl}) in {path}")
 
-    default_proxied = bool(raw.get("default_proxied", False))
+    default_proxied = bool(raw.get("default_proxied", True))
 
     # Known fields
     known_keys = {

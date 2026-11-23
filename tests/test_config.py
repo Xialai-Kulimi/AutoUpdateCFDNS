@@ -39,7 +39,7 @@ def test_load_legacy_config_compatibility(tmp_path: Path) -> None:
     assert cfg.interval == 30
     assert cfg.reconcile_interval == 3600
     assert cfg.default_ttl == 1
-    assert cfg.default_proxied is False
+    assert cfg.default_proxied is True
 
 
 def test_preserve_unknown_fields(tmp_path: Path) -> None:
